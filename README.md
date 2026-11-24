@@ -108,9 +108,29 @@ This enables the required APIs (`gmail`, `run`, `artifactregistry`, `cloudbuild`
 
 ### Step 2: Configure Google OAuth 2.0 Client (One-Time Console Step)
 
-GCP does not expose a public CLI/API for creating External Web OAuth clients. Open `https://console.cloud.google.com/auth/overview?project=<PROJECT_ID>`:
+GCP does not expose a public CLI/API for creating External Web OAuth clients. To delegate or perform this Console step **without** granting broad `roles/owner` or `roles/editor` access, bind only the following project-level predefined roles to the operator:
 
-1. **Branding / Audience:** Set app name, select **External**, keep publishing status in **Testing**, and add your allowlisted Gmail address(es) under **Test users**. (Note: Google expires Testing-mode refresh tokens every 7 days; the app handles `invalid_grant` automatically by prompting a fresh login.)
+| Predefined GCP Role | Role ID | Least-Privilege Purpose |
+|---|---|---|
+| **OAuth Config Editor** *(Required)* | `roles/oauthconfig.editor` | Grants `resourcemanager.projects.get` (Console access), `clientauthconfig.brands.*` (Branding / Consent Screen), `oauthconfig.testusers.*` (Testing allowlist), and `clientauthconfig.clients.*` (minting Web OAuth Client ID & reading its secret). |
+| **Service Usage Viewer** *(Optional UI helper)* | `roles/serviceusage.serviceUsageViewer` | Read-only (`serviceusage.services.list`) so the Console **Data Access** scope picker lists enabled APIs (`gmail.googleapis.com`). Without it, paste the scope string manually under *Manually add scopes*. |
+
+```bash
+# Grant least-privilege Step 2 access to an operator (revoke after one-time setup if desired)
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="user:operator@example.com" \
+  --role="roles/oauthconfig.editor" \
+  --condition=None
+
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
+  --member="user:operator@example.com" \
+  --role="roles/serviceusage.serviceUsageViewer" \
+  --condition=None
+```
+
+Once authorized, open `https://console.cloud.google.com/auth/overview?project=<PROJECT_ID>`:
+
+1. **Branding / Audience:** Set app name, select **External**, keep publishing status in **Testing**, and add your allowlisted Gmail address(es) under **Test users**. *(Note: the **User support email** selected on the Branding form must match the signed-in operator's email or a Google Group the operator owns/manages. Google expires Testing-mode refresh tokens every 7 days; the app handles `invalid_grant` automatically by prompting a fresh login.)*
 2. **Data Access (Scopes):** Add **only** `https://www.googleapis.com/auth/gmail.readonly`.
 3. **Clients -> Create Client:** Choose **Web application** and register the Authorized Redirect URIs printed by Step 1 (`http://localhost:8000/auth/callback` and `https://mymailapp-<PROJECT_NUMBER>.<REGION>.run.app/auth/callback`).
 
