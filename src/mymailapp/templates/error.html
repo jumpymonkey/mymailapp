@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — MyMailApp{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+  <h1>{{ title }}</h1>
+  <p class="muted">{{ message }}</p>
+  <a href="/" class="btn btn-primary">Return to Inbox</a>
+</section>
+{% endblock %}

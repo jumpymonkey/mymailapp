@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ thread.subject }} — MyMailApp{% endblock %}
+
+{% block content %}
+<nav class="thread-toolbar" aria-label="Thread controls">
+  <a href="/search?q={{ back_query | urlencode }}" class="btn btn-secondary btn-sm">&larr; Back to Search</a>
+  {% if (thread.messages | length) > 1 %}
+  <div class="toolbar-actions">
+    <button type="button" class="btn btn-secondary btn-sm" data-expand-all>Expand All ({{ thread.messages | length }})</button>
+    <button type="button" class="btn btn-secondary btn-sm" data-collapse-older>Collapse Older</button>
+  </div>
+  {% endif %}
+</nav>
+
+<header class="thread-header">
+  <h1>{{ thread.subject }}</h1>
+</header>
+
+<section class="message-stack">
+  {% for msg in thread.messages %}
+  <details class="message-card" {% if loop.last %}open{% endif %}>
+    <summary class="message-summary">
+      <div class="message-meta-primary">
+        <strong class="message-sender">{{ msg.sender }}</strong>
+        <span class="message-to">to {{ msg.recipients }}</span>
+      </div>
+      <time class="message-date">{{ msg.date_display }}</time>
+    </summary>
+
+    <div class="message-body-container">
+      {% if msg.has_blocked_remote_images and not thread.remote_images_loaded %}
+      <div class="remote-img-banner">
+        <span>Remote images were blocked to protect your privacy.</span>
+        <a
+          href="/threads/{{ thread.thread_id }}?q={{ back_query | urlencode }}&amp;load_images=true"
+          class="btn btn-secondary btn-sm"
+        >
+          Load remote images
+        </a>
+      </div>
+      {% endif %}
+
+      <iframe
+        class="email-frame"
+        sandbox=""
+        referrerpolicy="no-referrer"
+        title="Message from {{ msg.sender }}"
+        srcdoc="{{ msg.sanitized_srcdoc }}"
+      ></iframe>
+
+      {% if msg.attachments %}
+      <div class="attachments-bar">
+        <h2 class="attachments-heading">Attachments ({{ msg.attachments | length }})</h2>
+        <ul class="attachment-list">
+          {% for att in msg.attachments %}
+          <li>
+            <a
+              href="/messages/{{ att.message_id }}/attachments/{{ att.attachment_id }}?filename={{ att.filename | urlencode }}"
+              class="attachment-pill"
+              download="{{ att.filename }}"
+            >
+              <span class="att-name">{{ att.filename }}</span>
+              <span class="att-meta">{{ att.human_size }} &middot; {{ att.mime_type }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </details>
+  {% endfor %}
+</section>
+{% endblock %}

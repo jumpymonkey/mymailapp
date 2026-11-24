@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sign In — MyMailApp{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+  <h1>Search your Gmail inbox</h1>
+  <p class="muted">
+    MyMailApp connects directly to the Gmail API using a stateless encrypted browser cookie.
+    No messages, attachments, or tokens are ever stored in a database.
+  </p>
+
+  {% if error %}
+  <div class="alert alert-error" role="alert">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="scope-notice">
+    <strong>Minimum Permission Requested:</strong>
+    <code>https://www.googleapis.com/auth/gmail.readonly</code>
+    <span>View your email messages and settings (strictly read-only; cannot send, modify, or delete mail).</span>
+  </div>
+
+  <a href="/auth/start" class="btn btn-primary btn-lg">Sign in with Google</a>
+</section>
+{% endblock %}

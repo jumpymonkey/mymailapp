@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ results.query }} — MyMailApp{% endblock %}
+
+{% block content %}
+<section class="search-panel">
+  <form
+    action="/search"
+    method="get"
+    hx-get="/search"
+    hx-target="#thread-results"
+    hx-indicator="#search-spinner"
+    class="search-form"
+  >
+    <label for="q" class="sr-only">Gmail search query</label>
+    <input
+      id="q"
+      name="q"
+      type="search"
+      value="{{ results.query }}"
+      placeholder="Search mail (e.g. from:alice has:attachment newer_than:30d)"
+      autocomplete="off"
+      class="search-input"
+    >
+    <button type="submit" class="btn btn-primary">Search</button>
+    <span id="search-spinner" class="htmx-indicator spinner" aria-label="Searching...">Searching…</span>
+  </form>
+  <p class="search-hints">
+    Operators: <code>in:inbox</code> <code>from:</code> <code>to:</code>
+    <code>subject:</code> <code>has:attachment</code> <code>filename:pdf</code>
+    <code>newer_than:7d</code>
+  </p>
+</section>
+
+<div id="thread-results">
+  {% include "partials/thread_list.html" %}
+</div>
+{% endblock %}

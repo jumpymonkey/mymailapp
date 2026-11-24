@@ -1,0 +1,46 @@
+<section class="results-section" aria-live="polite">
+  <div class="results-meta">
+    <span>Query: <code>{{ results.query }}</code></span>
+    <span>{{ results.threads | length }} conversation{% if (results.threads | length) != 1 %}s{% endif %} shown</span>
+  </div>
+
+  {% if results.threads %}
+  <ul class="thread-list">
+    {% for thread in results.threads %}
+    <li class="thread-row">
+      <a href="/threads/{{ thread.thread_id }}?q={{ results.query | urlencode }}" class="thread-link">
+        <div class="thread-top">
+          <span class="thread-participants">
+            {{ thread.participants }}
+            {% if thread.message_count > 1 %}
+            <span class="msg-count" title="{{ thread.message_count }} messages in thread">{{ thread.message_count }}</span>
+            {% endif %}
+          </span>
+          <time class="thread-date">{{ thread.date_display }}</time>
+        </div>
+        <div class="thread-subject">{{ thread.subject }}</div>
+        <div class="thread-snippet">{{ thread.snippet }}</div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% if results.next_page_token %}
+  <div class="pagination-bar">
+    <a
+      href="/search?q={{ results.query | urlencode }}&amp;page_token={{ results.next_page_token | urlencode }}"
+      hx-get="/search?q={{ results.query | urlencode }}&amp;page_token={{ results.next_page_token | urlencode }}"
+      hx-target="#thread-results"
+      hx-swap="innerHTML show:window:top"
+      class="btn btn-secondary"
+    >
+      Next Page &rarr;
+    </a>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="empty-state">
+    <p>No conversations matched <code>{{ results.query }}</code>.</p>
+  </div>
+  {% endif %}
+</section>
